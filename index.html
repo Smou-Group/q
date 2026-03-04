@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>SMOU | عدّاد المندوبين</title>
+  <title>q.smougroup.com — عدّاد الأداء</title>
   <style>
     :root{
       --bg:#f3f7ff; --card:#fff; --text:#0b1b2b; --muted:#6b7a90;
@@ -12,11 +12,11 @@
     }
     *{box-sizing:border-box}
     body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Arial;background:var(--bg);color:var(--text)}
-    .wrap{max-width:980px;margin:28px auto;padding:0 14px}
+    .wrap{max-width:1100px;margin:28px auto;padding:0 14px}
     .top{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
     h1{margin:0;font-size:20px}
     .card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--shadow);padding:16px}
-    .grid{display:grid;grid-template-columns:1.2fr .8fr;gap:14px;margin-top:14px}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}
     @media (max-width:860px){ .grid{grid-template-columns:1fr} }
     label{display:block;font-size:13px;color:var(--muted);margin:10px 0 6px}
     select,input{width:100%;padding:12px 12px;border:1px solid var(--border);border-radius:14px;font-size:14px;outline:none}
@@ -30,27 +30,29 @@
     }
     button.secondary{background:#12324f}
     button.ghost{background:#eef5ff;color:var(--blue);border:1px solid var(--border)}
-    .hint{font-size:12px;color:var(--muted);margin-top:8px;line-height:1.5}
+    .hint{font-size:12px;color:var(--muted);margin-top:8px;line-height:1.6}
     .stats{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:8px}
-    .stat{
-      border:1px solid var(--border);border-radius:16px;padding:12px;background:#fbfdff
-    }
+    .stat{border:1px solid var(--border);border-radius:16px;padding:12px;background:#fbfdff}
     .stat .k{font-size:12px;color:var(--muted)}
     .stat .v{font-size:26px;font-weight:800;margin-top:6px;direction:ltr;text-align:left}
-    .toast{margin-top:10px;font-size:13px}
+    .toast{margin-top:10px;font-size:13px;min-height:18px}
     .ok{color:#0a7a3b}
     .bad{color:#b00020}
+    .mini{font-size:11px;color:var(--muted);direction:ltr;text-align:left;margin-top:6px}
   </style>
 </head>
 <body>
   <div class="wrap">
     <div class="top">
-      <h1>q.smougroup.com — عدّاد الأداء (مصاعد + تكييف)</h1>
-      <div style="font-size:12px;color:#6b7a90">SMOU GROUP</div>
+      <div>
+        <div style="font-size:12px;color:#6b7a90">SMOU GROUP</div>
+        <h1>q.smougroup.com — عدّاد الأداء (مصاعد + تكييف)</h1>
+      </div>
+      <div class="mini" id="apiHint"></div>
     </div>
 
     <div class="grid">
-      <!-- LEFT: Current totals -->
+      <!-- CURRENT TOTALS -->
       <div class="card">
         <div style="font-weight:800;margin-bottom:10px">الإجمالي الحالي (عداد)</div>
 
@@ -62,8 +64,8 @@
         <div class="stats">
           <div class="stat"><div class="k">عروض أسعار تكييف</div><div class="v" id="vAc">0</div></div>
           <div class="stat"><div class="k">عروض أسعار مصاعد</div><div class="v" id="vEl">0</div></div>
-          <div class="stat"><div class="k">زيارات مكاتب</div><div class="v" id="vOffices">0</div></div>
           <div class="stat"><div class="k">زيارات مواقع</div><div class="v" id="vSites">0</div></div>
+          <div class="stat"><div class="k">زيارات مكاتب</div><div class="v" id="vOffices">0</div></div>
         </div>
 
         <div class="btns">
@@ -71,13 +73,14 @@
         </div>
 
         <div class="toast" id="toast"></div>
+
         <div class="hint">
-          * الأرقام هنا تُسحب من Google Sheet.<br/>
-          * اضغط "حفظ" في الجهة اليمنى لإضافة زيادة جديدة على الإجمالي.
+          * الأسماء والأرقام تُسحب من Google Sheet.<br>
+          * لو الأسماء لم تظهر: غالبًا Token أو صلاحيات Web App أو الشيت فاضي.
         </div>
       </div>
 
-      <!-- RIGHT: Add increments -->
+      <!-- ADD INCREMENTS -->
       <div class="card">
         <div style="font-weight:800;margin-bottom:10px">إضافة زيادة جديدة (اليوم/الأسبوع)</div>
 
@@ -94,12 +97,12 @@
 
         <div class="row">
           <div>
-            <label>زيادة زيارات المكاتب</label>
-            <input id="iOffices" type="number" min="0" step="1" value="0" />
-          </div>
-          <div>
             <label>زيادة زيارات المواقع</label>
             <input id="iSites" type="number" min="0" step="1" value="0" />
+          </div>
+          <div>
+            <label>زيادة زيارات المكاتب</label>
+            <input id="iOffices" type="number" min="0" step="1" value="0" />
           </div>
         </div>
 
@@ -109,16 +112,19 @@
         </div>
 
         <div class="hint">
-          حماية بسيطة: الصفحة ترسل <b>token</b> للـ Apps Script. غيّر token في السكربت وفي الصفحة.
+          حماية بسيطة: الصفحة ترسل Token للـ Apps Script.<br>
+          عدّل Token في السكربت والصفحة بنفس القيمة.
         </div>
       </div>
     </div>
   </div>
 
   <script>
-    /************ CONFIG ************/
-    const API_URL = "PUT_YOUR_APPS_SCRIPT_WEBAPP_URL_HERE"; // مثال: https://script.google.com/macros/s/XXXX/exec
-    const TOKEN = "CHANGE_ME_123"; // لازم يطابق الموجود في Apps Script
+    /************ CONFIG (EDIT THESE) ************/
+    const API_URL = "https://script.google.com/macros/s/AKfycbzyfdNz9H3yOP32sgmlpvLkHHEBB4lW4_mPMudSeCwRez61wlFk43GjmvoKnyc3ybo/exec";
+    const TOKEN  = "SMOU_Q_2026"; // لازم يطابق TOKEN في Apps Script
+
+    document.getElementById("apiHint").textContent = API_URL;
 
     /************ JSONP ************/
     function jsonp(url) {
@@ -142,108 +148,115 @@
     }
 
     const $ = (id) => document.getElementById(id);
+
     const toast = (msg, ok=true) => {
       const el = $("toast");
       el.className = ok ? "toast ok" : "toast bad";
       el.textContent = msg;
-      setTimeout(() => { if(el.textContent === msg) el.textContent = ""; }, 3500);
+      setTimeout(() => { if (el.textContent === msg) el.textContent = ""; }, 4000);
     };
 
     function enc(v){ return encodeURIComponent(v ?? ""); }
     function toInt(v){ const n = parseInt(String(v||"0"),10); return isNaN(n)?0:n; }
 
-    async function loadList(){
-      const url = `${API_URL}?token=${enc(TOKEN)}&action=list`;
+    async function api(action, params = {}) {
+      const q = new URLSearchParams({ action, token: TOKEN, ...params });
+      const url = `${API_URL}?${q.toString()}`;
       const res = await jsonp(url);
-      if(!res.ok) throw new Error(res.error || "Failed list");
-      return res.data || [];
-    }
-
-    async function getTotals(name){
-      const url = `${API_URL}?token=${enc(TOKEN)}&action=get&name=${enc(name)}`;
-      const res = await jsonp(url);
-      if(!res.ok) throw new Error(res.error || "Failed get");
-      return res.data;
-    }
-
-    async function addTotals(name, ac, el, offices, sites){
-      const url =
-        `${API_URL}?token=${enc(TOKEN)}&action=add&name=${enc(name)}&ac=${enc(ac)}&el=${enc(el)}&offices=${enc(offices)}&sites=${enc(sites)}`;
-      const res = await jsonp(url);
-      if(!res.ok) throw new Error(res.error || "Failed add");
+      if (!res || !res.ok) throw new Error((res && res.error) ? res.error : "API error");
       return res.data;
     }
 
     function renderTotals(t){
       $("vAc").textContent = toInt(t.ac);
       $("vEl").textContent = toInt(t.el);
-      $("vOffices").textContent = toInt(t.offices);
       $("vSites").textContent = toInt(t.sites);
+      $("vOffices").textContent = toInt(t.offices);
     }
 
     function zeroInputs(){
       $("iAc").value = 0;
       $("iEl").value = 0;
-      $("iOffices").value = 0;
       $("iSites").value = 0;
+      $("iOffices").value = 0;
     }
 
-    async function init(){
-      try{
-        const list = await loadList();
-        const sel = $("repSelect");
-        sel.innerHTML = `<option value="">اختر المندوب…</option>` + list.map(n => `<option value="${String(n).replace(/"/g,'&quot;')}">${n}</option>`).join("");
+    async function loadNames(){
+      const sel = $("repSelect");
+      sel.innerHTML = `<option value="">جاري تحميل الأسماء…</option>`;
 
-        sel.addEventListener("change", async () => {
-          const name = sel.value.trim();
-          if(!name){ renderTotals({ac:0,el:0,offices:0,sites:0}); return; }
-          const totals = await getTotals(name);
-          renderTotals(totals);
-          toast("تم تحميل الأرقام الحالية ✅", true);
-        });
+      try {
+        // ping first (helps show token issues clearly)
+        await api("ping");
 
-        $("btnRefresh").addEventListener("click", async () => {
-          const name = $("repSelect").value.trim();
-          if(!name) return toast("اختر اسم المندوب أولاً", false);
-          const totals = await getTotals(name);
-          renderTotals(totals);
-          toast("تم التحديث ✅", true);
-        });
+        const list = await api("list");
+        if (!list || !list.length) {
+          sel.innerHTML = `<option value="">لا توجد أسماء في الشيت (عمود A فارغ)</option>`;
+          toast("الشيت لا يحتوي أسماء تحت عمود (اسم المندوب).", false);
+          return;
+        }
 
-        $("btnZero").addEventListener("click", () => {
-          zeroInputs();
-          toast("تم تصفير خانات الزيادة", true);
-        });
+        sel.innerHTML = `<option value="">اختر المندوب…</option>` + list
+          .map(n => `<option value="${String(n).replace(/"/g,'&quot;')}">${n}</option>`)
+          .join("");
 
-        $("btnSave").addEventListener("click", async () => {
-          const name = $("repSelect").value.trim();
-          if(!name) return toast("اختر اسم المندوب أولاً", false);
+        toast("تم تحميل الأسماء ✅", true);
 
-          const ac = toInt($("iAc").value);
-          const el = toInt($("iEl").value);
-          const offices = toInt($("iOffices").value);
-          const sites = toInt($("iSites").value);
-
-          if(ac===0 && el===0 && offices===0 && sites===0){
-            return toast("لا توجد زيادة لإضافتها", false);
-          }
-
-          const updated = await addTotals(name, ac, el, offices, sites);
-          renderTotals(updated);
-          zeroInputs();
-          toast("تم الحفظ وإضافة الأرقام على القديم ✅", true);
-        });
-
-        // optional: auto-select first rep if you want
-        // if(list[0]) { sel.value = list[0]; sel.dispatchEvent(new Event("change")); }
-
-      }catch(err){
-        console.error(err);
+      } catch (err) {
+        sel.innerHTML = `<option value="">خطأ في تحميل الأسماء: ${String(err.message || err)}</option>`;
         toast("خطأ: " + (err.message || err), false);
       }
     }
 
-    init();
+    async function refreshTotals(){
+      const name = $("repSelect").value.trim();
+      if (!name) return toast("اختر اسم المندوب أولاً", false);
+
+      try {
+        const totals = await api("get", { name });
+        renderTotals(totals);
+        toast("تم تحديث الأرقام ✅", true);
+      } catch (err) {
+        toast("خطأ: " + (err.message || err), false);
+      }
+    }
+
+    async function saveAdd(){
+      const name = $("repSelect").value.trim();
+      if (!name) return toast("اختر اسم المندوب أولاً", false);
+
+      const ac = toInt($("iAc").value);
+      const el = toInt($("iEl").value);
+      const sites = toInt($("iSites").value);
+      const offices = toInt($("iOffices").value);
+
+      if (ac===0 && el===0 && sites===0 && offices===0) {
+        return toast("لا توجد زيادة لإضافتها", false);
+      }
+
+      try {
+        const updated = await api("add", { name, ac, el, sites, offices });
+        renderTotals(updated);
+        zeroInputs();
+        toast("تم الحفظ وإضافة الأرقام على القديم ✅", true);
+      } catch (err) {
+        toast("خطأ: " + (err.message || err), false);
+      }
+    }
+
+    // events
+    $("btnRefresh").addEventListener("click", refreshTotals);
+    $("btnSave").addEventListener("click", saveAdd);
+    $("btnZero").addEventListener("click", () => { zeroInputs(); toast("تم تصفير خانات الزيادة", true); });
+
+    $("repSelect").addEventListener("change", async () => {
+      const name = $("repSelect").value.trim();
+      if (!name) { renderTotals({ac:0,el:0,sites:0,offices:0}); return; }
+      await refreshTotals();
+    });
+
+    // init
+    loadNames();
   </script>
 </body>
 </html>
