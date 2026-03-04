@@ -1,94 +1,249 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="utf-8">
-<title>كشف العائلة</title>
-
-<style>
-body{
-  font-family: Tahoma, Arial;
-  background:#f7f7f7;
-  padding:20px;
-}
-h2{margin-bottom:10px}
-input{
-  padding:10px;
-  width:300px;
-  font-size:16px;
-}
-table{
-  width:100%;
-  border-collapse:collapse;
-  margin-top:15px;
-  background:#fff;
-}
-th,td{
-  border:1px solid #ccc;
-  padding:10px;
-  text-align:right;
-}
-th{
-  background:#0f5c6e;
-  color:#fff;
-}
-tr:nth-child(even){background:#f2f2f2}
-.note{color:#666;margin-top:8px}
-</style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>SMOU | عدّاد المندوبين</title>
+  <style>
+    :root{
+      --bg:#f3f7ff; --card:#fff; --text:#0b1b2b; --muted:#6b7a90;
+      --blue:#0b5fa8; --border:#e6eef9; --shadow:0 12px 28px rgba(11,95,168,.14);
+      --r:18px;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Arial;background:var(--bg);color:var(--text)}
+    .wrap{max-width:980px;margin:28px auto;padding:0 14px}
+    .top{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+    h1{margin:0;font-size:20px}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--shadow);padding:16px}
+    .grid{display:grid;grid-template-columns:1.2fr .8fr;gap:14px;margin-top:14px}
+    @media (max-width:860px){ .grid{grid-template-columns:1fr} }
+    label{display:block;font-size:13px;color:var(--muted);margin:10px 0 6px}
+    select,input{width:100%;padding:12px 12px;border:1px solid var(--border);border-radius:14px;font-size:14px;outline:none}
+    input[type="number"]{direction:ltr;text-align:left}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    @media (max-width:520px){ .row{grid-template-columns:1fr} }
+    .btns{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+    button{
+      border:0;border-radius:14px;padding:12px 14px;font-weight:700;cursor:pointer;
+      background:var(--blue);color:#fff
+    }
+    button.secondary{background:#12324f}
+    button.ghost{background:#eef5ff;color:var(--blue);border:1px solid var(--border)}
+    .hint{font-size:12px;color:var(--muted);margin-top:8px;line-height:1.5}
+    .stats{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:8px}
+    .stat{
+      border:1px solid var(--border);border-radius:16px;padding:12px;background:#fbfdff
+    }
+    .stat .k{font-size:12px;color:var(--muted)}
+    .stat .v{font-size:26px;font-weight:800;margin-top:6px;direction:ltr;text-align:left}
+    .toast{margin-top:10px;font-size:13px}
+    .ok{color:#0a7a3b}
+    .bad{color:#b00020}
+  </style>
 </head>
-
 <body>
+  <div class="wrap">
+    <div class="top">
+      <h1>q.smougroup.com — عدّاد الأداء (مصاعد + تكييف)</h1>
+      <div style="font-size:12px;color:#6b7a90">SMOU GROUP</div>
+    </div>
 
-<h2>🔎 البحث باسم العائلة</h2>
+    <div class="grid">
+      <!-- LEFT: Current totals -->
+      <div class="card">
+        <div style="font-weight:800;margin-bottom:10px">الإجمالي الحالي (عداد)</div>
 
-<input id="search" placeholder="اكتب اسم العائلة" />
-<div class="note" id="info">يرجى رفع ملف البيانات</div>
-<br><br>
-<input type="file" id="file" accept=".csv">
+        <label>اسم المندوب</label>
+        <select id="repSelect">
+          <option value="">جاري تحميل الأسماء…</option>
+        </select>
 
-<table id="table" style="display:none">
-  <thead></thead>
-  <tbody></tbody>
-</table>
+        <div class="stats">
+          <div class="stat"><div class="k">عروض أسعار تكييف</div><div class="v" id="vAc">0</div></div>
+          <div class="stat"><div class="k">عروض أسعار مصاعد</div><div class="v" id="vEl">0</div></div>
+          <div class="stat"><div class="k">زيارات مكاتب</div><div class="v" id="vOffices">0</div></div>
+          <div class="stat"><div class="k">زيارات مواقع</div><div class="v" id="vSites">0</div></div>
+        </div>
 
-<script>
-let data=[], headers=[];
-const FAMILY_COL = "العائلة";
+        <div class="btns">
+          <button class="ghost" id="btnRefresh">تحديث الأرقام</button>
+        </div>
 
-document.getElementById("file").addEventListener("change", async e=>{
-  const text = await e.target.files[0].text();
-  const lines = text.trim().split("\n");
-  headers = lines[0].split(",");
-  data = lines.slice(1).map(l=>{
-    let obj={};
-    l.split(",").forEach((v,i)=>obj[headers[i]]=v);
-    return obj;
-  });
-  document.getElementById("info").innerText="تم تحميل البيانات";
-});
+        <div class="toast" id="toast"></div>
+        <div class="hint">
+          * الأرقام هنا تُسحب من Google Sheet.<br/>
+          * اضغط "حفظ" في الجهة اليمنى لإضافة زيادة جديدة على الإجمالي.
+        </div>
+      </div>
 
-document.getElementById("search").addEventListener("input",()=>{
-  const q = document.getElementById("search").value.trim();
-  const table = document.getElementById("table");
-  const thead = table.querySelector("thead");
-  const tbody = table.querySelector("tbody");
+      <!-- RIGHT: Add increments -->
+      <div class="card">
+        <div style="font-weight:800;margin-bottom:10px">إضافة زيادة جديدة (اليوم/الأسبوع)</div>
 
-  if(!q){ table.style.display="none"; return; }
+        <div class="row">
+          <div>
+            <label>زيادة عروض أسعار تكييف</label>
+            <input id="iAc" type="number" min="0" step="1" value="0" />
+          </div>
+          <div>
+            <label>زيادة عروض أسعار مصاعد</label>
+            <input id="iEl" type="number" min="0" step="1" value="0" />
+          </div>
+        </div>
 
-  const norm = s => (s||"").toString().trim().replace(/\s+/g," ");
-const res = data.filter(r => norm(r[FAMILY_COL]).includes(norm(q)));
+        <div class="row">
+          <div>
+            <label>زيادة زيارات المكاتب</label>
+            <input id="iOffices" type="number" min="0" step="1" value="0" />
+          </div>
+          <div>
+            <label>زيادة زيارات المواقع</label>
+            <input id="iSites" type="number" min="0" step="1" value="0" />
+          </div>
+        </div>
 
-  if(!res.length){
-    document.getElementById("info").innerText="لا توجد نتائج";
-    table.style.display="none";
-    return;
-  }
+        <div class="btns">
+          <button id="btnSave">حفظ (إضافة على القديم)</button>
+          <button class="secondary" id="btnZero">تصفير خانات الزيادة</button>
+        </div>
 
-  thead.innerHTML="<tr>"+headers.map(h=>`<th>${h}</th>`).join("")+"</tr>";
-  tbody.innerHTML=res.map(r=>"<tr>"+headers.map(h=>`<td>${r[h]||""}</td>`).join("")+"</tr>").join("");
-  table.style.display="table";
-  document.getElementById("info").innerText=`عدد النتائج: ${res.length}`;
-});
-</script>
+        <div class="hint">
+          حماية بسيطة: الصفحة ترسل <b>token</b> للـ Apps Script. غيّر token في السكربت وفي الصفحة.
+        </div>
+      </div>
+    </div>
+  </div>
 
+  <script>
+    /************ CONFIG ************/
+    const API_URL = "PUT_YOUR_APPS_SCRIPT_WEBAPP_URL_HERE"; // مثال: https://script.google.com/macros/s/XXXX/exec
+    const TOKEN = "CHANGE_ME_123"; // لازم يطابق الموجود في Apps Script
+
+    /************ JSONP ************/
+    function jsonp(url) {
+      return new Promise((resolve, reject) => {
+        const cb = "cb_" + Math.random().toString(36).slice(2);
+        const s = document.createElement("script");
+        const sep = url.includes("?") ? "&" : "?";
+        window[cb] = (data) => {
+          delete window[cb];
+          s.remove();
+          resolve(data);
+        };
+        s.onerror = () => {
+          delete window[cb];
+          s.remove();
+          reject(new Error("JSONP load error"));
+        };
+        s.src = url + sep + "callback=" + cb;
+        document.body.appendChild(s);
+      });
+    }
+
+    const $ = (id) => document.getElementById(id);
+    const toast = (msg, ok=true) => {
+      const el = $("toast");
+      el.className = ok ? "toast ok" : "toast bad";
+      el.textContent = msg;
+      setTimeout(() => { if(el.textContent === msg) el.textContent = ""; }, 3500);
+    };
+
+    function enc(v){ return encodeURIComponent(v ?? ""); }
+    function toInt(v){ const n = parseInt(String(v||"0"),10); return isNaN(n)?0:n; }
+
+    async function loadList(){
+      const url = `${API_URL}?token=${enc(TOKEN)}&action=list`;
+      const res = await jsonp(url);
+      if(!res.ok) throw new Error(res.error || "Failed list");
+      return res.data || [];
+    }
+
+    async function getTotals(name){
+      const url = `${API_URL}?token=${enc(TOKEN)}&action=get&name=${enc(name)}`;
+      const res = await jsonp(url);
+      if(!res.ok) throw new Error(res.error || "Failed get");
+      return res.data;
+    }
+
+    async function addTotals(name, ac, el, offices, sites){
+      const url =
+        `${API_URL}?token=${enc(TOKEN)}&action=add&name=${enc(name)}&ac=${enc(ac)}&el=${enc(el)}&offices=${enc(offices)}&sites=${enc(sites)}`;
+      const res = await jsonp(url);
+      if(!res.ok) throw new Error(res.error || "Failed add");
+      return res.data;
+    }
+
+    function renderTotals(t){
+      $("vAc").textContent = toInt(t.ac);
+      $("vEl").textContent = toInt(t.el);
+      $("vOffices").textContent = toInt(t.offices);
+      $("vSites").textContent = toInt(t.sites);
+    }
+
+    function zeroInputs(){
+      $("iAc").value = 0;
+      $("iEl").value = 0;
+      $("iOffices").value = 0;
+      $("iSites").value = 0;
+    }
+
+    async function init(){
+      try{
+        const list = await loadList();
+        const sel = $("repSelect");
+        sel.innerHTML = `<option value="">اختر المندوب…</option>` + list.map(n => `<option value="${String(n).replace(/"/g,'&quot;')}">${n}</option>`).join("");
+
+        sel.addEventListener("change", async () => {
+          const name = sel.value.trim();
+          if(!name){ renderTotals({ac:0,el:0,offices:0,sites:0}); return; }
+          const totals = await getTotals(name);
+          renderTotals(totals);
+          toast("تم تحميل الأرقام الحالية ✅", true);
+        });
+
+        $("btnRefresh").addEventListener("click", async () => {
+          const name = $("repSelect").value.trim();
+          if(!name) return toast("اختر اسم المندوب أولاً", false);
+          const totals = await getTotals(name);
+          renderTotals(totals);
+          toast("تم التحديث ✅", true);
+        });
+
+        $("btnZero").addEventListener("click", () => {
+          zeroInputs();
+          toast("تم تصفير خانات الزيادة", true);
+        });
+
+        $("btnSave").addEventListener("click", async () => {
+          const name = $("repSelect").value.trim();
+          if(!name) return toast("اختر اسم المندوب أولاً", false);
+
+          const ac = toInt($("iAc").value);
+          const el = toInt($("iEl").value);
+          const offices = toInt($("iOffices").value);
+          const sites = toInt($("iSites").value);
+
+          if(ac===0 && el===0 && offices===0 && sites===0){
+            return toast("لا توجد زيادة لإضافتها", false);
+          }
+
+          const updated = await addTotals(name, ac, el, offices, sites);
+          renderTotals(updated);
+          zeroInputs();
+          toast("تم الحفظ وإضافة الأرقام على القديم ✅", true);
+        });
+
+        // optional: auto-select first rep if you want
+        // if(list[0]) { sel.value = list[0]; sel.dispatchEvent(new Event("change")); }
+
+      }catch(err){
+        console.error(err);
+        toast("خطأ: " + (err.message || err), false);
+      }
+    }
+
+    init();
+  </script>
 </body>
 </html>
