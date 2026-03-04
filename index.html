@@ -3,50 +3,173 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>q.smougroup.com — عدّاد الأداء</title>
+  <title>مؤشر الأداء اليومي — q.smougroup.com</title>
+
   <style>
     :root{
-      --bg:#f3f7ff; --card:#fff; --text:#0b1b2b; --muted:#6b7a90;
-      --blue:#0b5fa8; --border:#e6eef9; --shadow:0 12px 28px rgba(11,95,168,.14);
-      --r:18px;
+      --text:#ffffff;
+      --muted: rgba(255,255,255,.78);
+
+      /* Glass */
+      --glass: rgba(255,255,255,.14);
+      --glass2: rgba(255,255,255,.10);
+      --border: rgba(255,255,255,.22);
+      --shadow: 0 18px 55px rgba(0,0,0,.35);
+
+      /* Accent */
+      --blue: rgba(40,150,255,.65);
+      --blue2: rgba(17,120,214,.45);
+      --danger: rgba(255,70,70,.60);
+
+      --r:20px;
     }
+
     *{box-sizing:border-box}
-    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Arial;background:var(--bg);color:var(--text)}
-    .wrap{max-width:1100px;margin:28px auto;padding:0 14px}
-    .top{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
-    h1{margin:0;font-size:20px}
-    .card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--shadow);padding:16px}
+    body{
+      margin:0;
+      font-family:system-ui,-apple-system,Segoe UI,Arial;
+      color:var(--text);
+      min-height:100vh;
+      background:
+        url("back.webp") center/cover no-repeat,
+        url("back.jpg") center/cover no-repeat,
+        url("back.png") center/cover no-repeat,
+        radial-gradient(1200px 600px at 70% 10%, rgba(30,140,255,.28), transparent 60%),
+        linear-gradient(180deg, #061a30 0%, #071c33 55%, #061425 100%);
+    }
+
+    /* overlay for readability */
+    body::before{
+      content:"";
+      position:fixed;
+      inset:0;
+      background:
+        linear-gradient(180deg, rgba(3,10,20,.55), rgba(3,10,20,.72));
+      pointer-events:none;
+      z-index:-1;
+    }
+
+    .wrap{max-width:1100px;margin:26px auto;padding:0 14px}
+    .top{
+      display:flex;gap:14px;align-items:center;justify-content:space-between;flex-wrap:wrap
+    }
+
+    .brand{
+      display:flex;align-items:center;gap:12px;min-width:240px;
+    }
+    .brand img{
+      width:46px;height:46px;object-fit:contain;
+      border-radius:14px;
+      background:rgba(255,255,255,.10);
+      border:1px solid var(--border);
+      padding:6px;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      box-shadow: 0 12px 28px rgba(0,0,0,.22);
+    }
+
+    h1{margin:0;font-size:20px;letter-spacing:.2px}
+    .sub{font-size:12px;color:var(--muted);margin-top:4px}
+    .mini{font-size:11px;color:rgba(255,255,255,.65);direction:ltr;text-align:left;margin-top:6px}
+
+    /* Glass card */
+    .card{
+      background: linear-gradient(180deg, var(--glass), var(--glass2));
+      border:1px solid var(--border);
+      border-radius:var(--r);
+      box-shadow:var(--shadow);
+      padding:16px;
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+    }
+
     .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}
     @media (max-width:860px){ .grid{grid-template-columns:1fr} }
+
     label{display:block;font-size:13px;color:var(--muted);margin:10px 0 6px}
-    select,input{width:100%;padding:12px 12px;border:1px solid var(--border);border-radius:14px;font-size:14px;outline:none}
+
+    /* Inputs (glass) */
+    select,input{
+      width:100%;
+      padding:12px 12px;
+      border-radius:16px;
+      font-size:14px;
+      outline:none;
+      color:#fff;
+      background:rgba(255,255,255,.10);
+      border:1px solid rgba(255,255,255,.20);
+      box-shadow: 0 10px 22px rgba(0,0,0,.18);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+    select option{color:#0b1b2b}
+    input::placeholder{color:rgba(255,255,255,.65)}
     input[type="number"]{direction:ltr;text-align:left}
+
     .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
     @media (max-width:520px){ .row{grid-template-columns:1fr} }
+
     .btns{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+
+    /* Buttons (glass) */
     button{
-      border:0;border-radius:14px;padding:12px 14px;font-weight:700;cursor:pointer;
-      background:var(--blue);color:#fff
+      border:1px solid rgba(255,255,255,.22);
+      border-radius:16px;
+      padding:12px 14px;
+      font-weight:800;
+      cursor:pointer;
+      color:#fff;
+      background: linear-gradient(180deg, var(--blue), var(--blue2));
+      box-shadow: 0 14px 32px rgba(0,0,0,.22);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      transition: transform .12s ease, filter .12s ease;
     }
-    button.secondary{background:#12324f}
-    button.ghost{background:#eef5ff;color:var(--blue);border:1px solid var(--border)}
-    .hint{font-size:12px;color:var(--muted);margin-top:8px;line-height:1.6}
-    .stats{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:8px}
-    .stat{border:1px solid var(--border);border-radius:16px;padding:12px;background:#fbfdff}
-    .stat .k{font-size:12px;color:var(--muted)}
-    .stat .v{font-size:26px;font-weight:800;margin-top:6px;direction:ltr;text-align:left}
+    button:hover{transform: translateY(-1px); filter: brightness(1.06);}
+    button:active{transform: translateY(0px); filter: brightness(.98);}
+
+    button.secondary{
+      background: linear-gradient(180deg, rgba(10,40,70,.70), rgba(7,28,51,.55));
+    }
+    button.ghost{
+      background: rgba(255,255,255,.12);
+    }
+
+    .hint{font-size:12px;color:rgba(255,255,255,.75);margin-top:10px;line-height:1.7}
+
+    .stats{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:10px}
+
+    .stat{
+      border:1px solid rgba(255,255,255,.22);
+      border-radius:18px;
+      padding:12px;
+      background: rgba(255,255,255,.10);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      box-shadow: 0 10px 22px rgba(0,0,0,.16);
+    }
+    .stat .k{font-size:12px;color:rgba(255,255,255,.78)}
+    .stat .v{
+      font-size:28px;font-weight:900;margin-top:6px;
+      direction:ltr;text-align:left;
+      text-shadow: 0 8px 26px rgba(0,0,0,.28);
+    }
+
     .toast{margin-top:10px;font-size:13px;min-height:18px}
-    .ok{color:#0a7a3b}
-    .bad{color:#b00020}
-    .mini{font-size:11px;color:var(--muted);direction:ltr;text-align:left;margin-top:6px}
+    .ok{color:#5ef0a2}
+    .bad{color:#ff9aa6}
   </style>
 </head>
+
 <body>
   <div class="wrap">
     <div class="top">
-      <div>
-        <div style="font-size:12px;color:#6b7a90">SMOU GROUP</div>
-        <h1>q.smougroup.com — عدّاد الأداء (مصاعد + تكييف)</h1>
+      <div class="brand">
+        <img src="logo.png" alt="SMOU GROUP" onerror="this.style.display='none'">
+        <div>
+          <h1>مؤشر الأداء اليومي (مصاعد + تكييف)</h1>
+          <div class="sub">SMOU GROUP — q.smougroup.com</div>
+        </div>
       </div>
       <div class="mini" id="apiHint"></div>
     </div>
@@ -54,7 +177,7 @@
     <div class="grid">
       <!-- CURRENT TOTALS -->
       <div class="card">
-        <div style="font-weight:800;margin-bottom:10px">الإجمالي الحالي (عداد)</div>
+        <div style="font-weight:900;margin-bottom:10px">الإجمالي الحالي (عداد)</div>
 
         <label>اسم المندوب</label>
         <select id="repSelect">
@@ -82,7 +205,7 @@
 
       <!-- ADD INCREMENTS -->
       <div class="card">
-        <div style="font-weight:800;margin-bottom:10px">إضافة زيادة جديدة (اليوم/الأسبوع)</div>
+        <div style="font-weight:900;margin-bottom:10px">إضافة زيادة جديدة (اليوم/الأسبوع)</div>
 
         <div class="row">
           <div>
@@ -260,4 +383,3 @@
   </script>
 </body>
 </html>
-
